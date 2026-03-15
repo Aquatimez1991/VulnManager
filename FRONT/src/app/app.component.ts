@@ -1,21 +1,50 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ServicioService } from './core/services/servicio.service';
 import { Servicio, EndpointPreview } from './core/models/servicio.model';
+import { open } from '@tauri-apps/plugin-dialog';
+import { invoke } from '@tauri-apps/api/core';
+
+
+export interface HallazgoPreview {
+  severidad: string;
+  titulo: string;
+  descripcion: string;
+  implicacion: string; // <-- NUEVO
+  solucion: string;
+  referencia: string;  // <-- NUEVO (Atrapará OWASP y CWE)
+  url_afectada: string;
+  fecha_escaneo: string;
+}
+
+export interface HallazgoVista {
+  id: number;
+  url_endpoint: string;
+  vulnerabilidad: string;
+  severidad: string;
+  estado_actual: string;
+}
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
+
+  
   servicios: Servicio[] = [];
   mensaje: string = '';
+  nuevoServicioNombre: string = '';
+  nuevoServicioArea: string = '';
   
   // Lista donde guardaremos lo que extraigamos del Excel
   endpointsExtraidos: EndpointPreview[] = [];
+  servicioSeleccionadoId: number | null = null;
+
 
   constructor(private servicioService: ServicioService) {}
 
@@ -23,14 +52,49 @@ export class AppComponent implements OnInit {
     await this.cargarTabla();
   }
 
-  async cargarTabla() {
+async cargarTabla() {
     try {
       this.servicios = await this.servicioService.listarServicios();
+      // Si hay servicios cargados y no hemos seleccionado ninguno, elegimos el primero por defecto
+      if (this.servicios.length > 0 && !this.servicioSeleccionadoId) {
+        this.servicioSeleccionadoId = this.servicios[0].id!;
+        this.cargarDashboard(this.servicioSeleccionadoId);
+      }
     } catch (error) {
       console.error('Error al obtener la lista:', error);
     }
   }
+  async crearNuevoServicio() {
+    if (!this.nuevoServicioNombre || !this.nuevoServicioArea) {
+      this.mensaje = "Por favor, completa el nombre y el área del servicio.";
+      return;
+    }
 
+    try {
+      this.mensaje = "Registrando nuevo servicio...";
+      // Llamamos a tu controlador de Rust que ya existía
+      await invoke('crear_servicio_controller', {
+        nombre: this.nuevoServicioNombre,
+        area: this.nuevoServicioArea,
+        registradoPor: 'Elias' // Dejamos tu nombre como el auditor responsable
+      });
+
+      this.nuevoServicioNombre = '';
+      this.nuevoServicioArea = '';
+      this.mensaje = "¡Servicio registrado exitosamente!";
+      
+      // Recargamos la lista para que aparezca en el menú desplegable
+      await this.cargarTabla(); 
+    } catch (error) {
+      this.mensaje = "Error al crear servicio: " + error;
+    }
+  }
+  // Función que se ejecuta cuando cambias el menú desplegable
+  cambiarServicioSeleccionado(event: any) {
+    this.servicioSeleccionadoId = Number(event.target.value);
+    this.cargarDashboard(this.servicioSeleccionadoId);
+    this.mensaje = `Contexto cambiado: Ahora trabajando en el Servicio ID ${this.servicioSeleccionadoId}`;
+  }
   // MAGIA AQUI: Esta función intercepta el Ctrl+V
 procesarPegadoExcel(event: ClipboardEvent) {
     event.preventDefault(); 
@@ -96,7 +160,11 @@ procesarPegadoExcel(event: ClipboardEvent) {
     try {
       // Por ahora, forzaremos el guardado en el Servicio con ID 1 (Sistema de Citas RENIEC)
       // Más adelante haremos un menú desplegable para elegir el servicio
-      const idServicio = 1; 
+      if (!this.servicioSeleccionadoId) {
+      this.mensaje = "Error: Selecciona un servicio primero.";
+      return;
+    }
+    const idServicio = this.servicioSeleccionadoId;
       
       this.mensaje = "Guardando en base de datos...";
       const respuesta = await this.servicioService.guardarEndpointsNuevos(idServicio, this.endpointsExtraidos);
@@ -107,5 +175,104 @@ procesarPegadoExcel(event: ClipboardEvent) {
       this.mensaje = 'Error del servidor: ' + error;
     }
   }
+
+// Lista para la tabla visual de vulnerabilidades
+  hallazgosExtraidos: HallazgoPreview[] = [];
+
+  rutaPdfSeleccionado: string = '';
+
+  async procesarReporteFortify() {
+    try {
+      const rutaArchivo = await open({
+        multiple: false,
+        title: 'Seleccionar Reporte de Fortify',
+        filters: [{ name: 'Documentos PDF', extensions: ['pdf'] }]
+      });
+
+      if (rutaArchivo) {
+        this.rutaPdfSeleccionado = rutaArchivo;
+        this.mensaje = "Leyendo el PDF con el motor de Rust...";
+        
+        // 1. Rust lee el archivo a nivel de sistema operativo
+        const textoCrudo = await invoke<string>('leer_pdf_controller', { ruta: rutaArchivo });
+        
+        // 2. Angular busca los patrones en el texto
+        this.extraerHallazgosDelTexto(textoCrudo);
+      }
+    } catch (error) {
+      this.mensaje = "Error al procesar el PDF: " + error;
+    }
+  }
+
+extraerHallazgosDelTexto(texto: string) {
+    this.hallazgosExtraidos = [];
+
+    // 1. Extraer la Fecha Global del Documento
+    // Busca "Scan Date:" y captura todo lo que haya hasta el salto de línea
+    const matchFecha = texto.match(/Scan Date:\s*(.*?)\n/);
+    const fechaReporte = matchFecha ? matchFecha[1].trim() : 'Fecha Desconocida';
+
+    // 2. Extraer los Hallazgos
+    const regexFortify = /(Critical|High|Medium|Low)(?:\*|\s)*(.*?)\s*Summary:\s*(.*?)\s*Execution:\s*(.*?)\s*Implication:\s*(.*?)\s*Fix:\s*(.*?)\s*Reference:\s*(.*?)\s*File Names:\s*([^\s\n]+)/gs;
+
+    let match;
+    while ((match = regexFortify.exec(texto)) !== null) {
+      this.hallazgosExtraidos.push({
+        severidad: match[1].trim(),
+        titulo: match[2].replace(/\*/g, '').trim(),
+        descripcion: match[3].trim(),
+        implicacion: match[5].trim(),
+        solucion: match[6].trim(),
+        referencia: match[7].replace(/\n/g, ' | ').trim(),
+        url_afectada: match[8].trim(),
+        fecha_escaneo: fechaReporte // Asignamos la fecha extraída
+      });
+    }
+
+    if (this.hallazgosExtraidos.length > 0) {
+      this.mensaje = `¡Escaneo completo! Se detectaron ${this.hallazgosExtraidos.length} vulnerabilidades del reporte del ${fechaReporte}.`;
+    } else {
+      this.mensaje = "No se encontraron vulnerabilidades o el PDF no tiene el formato esperado.";
+    }
+  }
+
+
+async guardarReporteVulnerabilidades() {
+    // 1. Validamos que haya un servicio seleccionado en el menú azul
+    if (!this.servicioSeleccionadoId) {
+      this.mensaje = "Error: Selecciona un servicio primero en el panel superior.";
+      return;
+    }
+
+    try {
+      this.mensaje = "Iniciando transacción relacional en SQLite...";
+      const payload = {
+        servicio_id: this.servicioSeleccionadoId, // <-- ¡AHORA SÍ ES 100% DINÁMICO!
+        ruta_pdf: this.rutaPdfSeleccionado,
+        fecha_escaneo: this.hallazgosExtraidos[0]?.fecha_escaneo || '',
+        hallazgos: this.hallazgosExtraidos
+      };
+
+      const respuesta = await invoke<string>('guardar_reporte_completo_controller', { payload });
+      this.mensaje = respuesta;
+      this.hallazgosExtraidos = []; // Limpia la tabla visual de vista previa
+      
+      // NUEVA MAGIA: Refrescamos el Dashboard de abajo para mostrar los nuevos hallazgos al instante
+      this.cargarDashboard(this.servicioSeleccionadoId);
+
+    } catch (error) {
+      this.mensaje = 'Error del servidor: ' + error;
+    }
+  }
+
+  hallazgosBaseDatos: HallazgoVista[] = [];
+
+  async cargarDashboard(servicioId: number) {
+  try {
+    this.hallazgosBaseDatos = await invoke<HallazgoVista[]>('listar_hallazgos_controller', { servicioId });
+  } catch (error) {
+    console.error("Error cargando dashboard:", error);
+  }
+}
 
 }

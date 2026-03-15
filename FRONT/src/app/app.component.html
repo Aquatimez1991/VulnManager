@@ -7,6 +7,36 @@
   <h2 style="color: #2c3e50">Gestor de Vulnerabilidades SOC</h2>
   <hr style="border: 1px solid #eee; margin-bottom: 20px" />
 
+  <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #b6d4fe; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+    
+    <div style="flex: 1; min-width: 300px;">
+      <h3 style="margin-top: 0; color: #084298;">🏢 Contexto de Auditoría</h3>
+      <p style="font-size: 14px; color: #052c65; margin-bottom: 5px;"><strong>Selecciona el Servicio Activo:</strong></p>
+      
+      <select *ngIf="servicios.length > 0" 
+              (change)="cambiarServicioSeleccionado($event)" 
+              [value]="servicioSeleccionadoId"
+              style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; font-weight: bold;">
+        <option *ngFor="let s of servicios" [value]="s.id">
+          [{{ s.id }}] {{ s.nombre_servicio }} ({{ s.area_usuaria }})
+        </option>
+      </select>
+      <p *ngIf="servicios.length === 0" style="color: red; font-size: 14px;">No hay servicios registrados. Crea uno primero.</p>
+    </div>
+
+    <div style="flex: 1; min-width: 300px; background: white; padding: 15px; border-radius: 6px; border: 1px dashed #084298;">
+      <h4 style="margin-top: 0; color: #084298; font-size: 14px;">+ Registrar Nuevo Servicio</h4>
+      <div style="display: flex; gap: 10px;">
+        <input type="text" [(ngModel)]="nuevoServicioNombre" placeholder="Nombre (ej. Duplicado DNI)" style="flex: 2; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        <input type="text" [(ngModel)]="nuevoServicioArea" placeholder="Área (ej. TI)" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        <button (click)="crearNuevoServicio()" style="background: #0d6efd; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+          Añadir
+        </button>
+      </div>
+    </div>
+
+  </div>
+
   <div
     style="
       background: #f8f9fa;
@@ -107,7 +137,55 @@
       </button>
     </div>
   </div>
-
+<div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffeeba;">
+    <h3 style="margin-top: 0; color: #856404;">2. Cargar Reporte de Escaneo (Fortify)</h3>
+    <p style="color: #666; font-size: 14px;">Sube el reporte en PDF para extraer las vulnerabilidades automáticamente.</p>
+    
+    <button (click)="procesarReporteFortify()" 
+            style="padding: 10px 20px; background: #ffc107; color: #212529; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+      📄 Examinar PDF de Fortify
+    </button>
+  </div>
+<div *ngIf="hallazgosExtraidos.length > 0" style="margin-top: 20px;">
+      <h4 style="color: #dc3545;">🚨 Vulnerabilidades Detectadas ({{ hallazgosExtraidos.length }})</h4>
+      
+      <p style="font-size: 14px; color: #555; margin-top: -10px; margin-bottom: 15px;">
+        📅 <strong>Fecha del reporte:</strong> {{ hallazgosExtraidos[0].fecha_escaneo }}
+      </p>
+      
+      <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd; font-size: 14px;">
+        <thead>
+          <tr style="background: #f8d7da; color: #721c24;">
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left; width: 80px;">Sev.</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Vulnerabilidad</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Impacto y Referencias</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Endpoint</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let h of hallazgosExtraidos">
+            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold; text-align: center;"
+                [ngStyle]="{'color': h.severidad === 'Critical' ? 'red' : h.severidad === 'High' ? 'orange' : h.severidad === 'Medium' ? '#d39e00' : 'green'}">
+              {{ h.severidad }}
+            </td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+              <strong style="color: #0056b3;">{{ h.titulo }}</strong><br>
+              <small style="color:#555; display: block; margin-top: 4px; line-height: 1.4;">{{ h.descripcion }}</small>
+            </td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+              <small style="color:#d32f2f; display: block; margin-bottom: 4px; line-height: 1.4;"><strong>Impacto:</strong> {{ h.implicacion }}</small>
+              <small style="color:#28a745; display: block;"><strong>Estándar:</strong> {{ h.referencia }}</small>
+            </td>
+            <td style="padding: 8px; border: 1px solid #ddd; font-family: monospace;">{{ h.url_afectada }}</td>
+          </tr>
+        </tbody>
+      </table>
+      
+ <button (click)="guardarReporteVulnerabilidades()" style="margin-top: 15px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+        Vincular a Endpoints y Guardar
+      </button>
+      
+    </div>
   <div
     style="
       background: #e9ecef;
@@ -145,3 +223,35 @@
     </li>
   </ul>
 </div>
+<div style="background: #e9ecef; padding: 20px; border-radius: 8px; margin-top: 30px; border: 1px solid #ced4da;">
+    <h3 style="margin-top: 0; color: #495057;">📊 Dashboard: Estado Actual de Vulnerabilidades</h3>
+    
+    <table *ngIf="hallazgosBaseDatos.length > 0" style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd; font-size: 14px;">
+      <thead>
+        <tr style="background: #343a40; color: white;">
+          <th style="padding: 10px; text-align: left;">ID</th>
+          <th style="padding: 10px; text-align: left;">Severidad</th>
+          <th style="padding: 10px; text-align: left;">Vulnerabilidad</th>
+          <th style="padding: 10px; text-align: left;">Endpoint</th>
+          <th style="padding: 10px; text-align: center;">Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let h of hallazgosBaseDatos">
+          <td style="padding: 8px; border: 1px solid #ddd; color: #666;">#{{ h.id }}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;"
+              [ngStyle]="{'color': h.severidad === 'Crítica' ? 'red' : h.severidad === 'Alta' ? 'orange' : h.severidad === 'Media' ? '#d39e00' : 'green'}">
+            {{ h.severidad }}
+          </td>
+          <td style="padding: 8px; border: 1px solid #ddd;">{{ h.vulnerabilidad }}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; font-family: monospace;">{{ h.url_endpoint }}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+            <span style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">
+              {{ h.estado_actual }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p *ngIf="hallazgosBaseDatos.length === 0" style="color: #666;">No hay vulnerabilidades registradas para este servicio.</p>
+  </div>
