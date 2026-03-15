@@ -1,0 +1,147 @@
+<div
+  style="
+    padding: 30px;
+    font-family: &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
+  "
+>
+  <h2 style="color: #2c3e50">Gestor de Vulnerabilidades SOC</h2>
+  <hr style="border: 1px solid #eee; margin-bottom: 20px" />
+
+  <div
+    style="
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+    "
+  >
+    <h3 style="margin-top: 0; color: #333">1. Ingesta de APIs / URLs</h3>
+    <p style="color: #666; font-size: 14px">
+      Copia las filas desde tu Excel (URL y Método) y haz Ctrl+V o Clic Derecho
+      -> Pegar dentro del recuadro punteado.
+    </p>
+
+    <div
+      (paste)="procesarPegadoExcel($event)"
+      contenteditable="true"
+      style="
+        border: 2px dashed #0056b3;
+        background: #e9f2ff;
+        padding: 30px;
+        text-align: center;
+        border-radius: 8px;
+        outline: none;
+        cursor: text;
+      "
+    >
+      <span style="color: #0056b3; font-weight: bold"
+        >Haz clic aquí y presiona Ctrl + V para pegar desde Excel</span
+      >
+    </div>
+
+    <div *ngIf="endpointsExtraidos.length > 0" style="margin-top: 20px">
+      <h4 style="color: #28a745">
+        ✓ Vista Previa ({{ endpointsExtraidos.length }} APIs detectadas)
+      </h4>
+
+      <table
+        style="
+          width: 100%;
+          border-collapse: collapse;
+          background: white;
+          border: 1px solid #ddd;
+        "
+      >
+        <thead>
+          <tr style="background: #f1f1f1">
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left">
+              URL / Endpoint
+            </th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left">
+              Método
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let endpoint of endpointsExtraidos">
+            <td
+              style="
+                padding: 8px;
+                border: 1px solid #ddd;
+                font-family: monospace;
+              "
+            >
+              {{ endpoint.url_endpoint }}
+            </td>
+            <td style="padding: 8px; border: 1px solid #ddd">
+              <span
+                style="
+                  background: #eee;
+                  padding: 3px 6px;
+                  border-radius: 4px;
+                  font-size: 12px;
+                  font-weight: bold;
+                "
+              >
+                {{ endpoint.metodo_http }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <button
+        (click)="guardarEnBD()"
+        style="
+          margin-top: 15px;
+          padding: 10px 20px;
+          background: #0056b3;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          font-weight: bold;
+          cursor: pointer;
+        "
+      >
+        Guardar Endpoints en la Base de Datos
+      </button>
+    </div>
+  </div>
+
+  <div
+    style="
+      background: #e9ecef;
+      padding: 10px;
+      border-left: 4px solid #6c757d;
+      margin-bottom: 20px;
+    "
+  >
+    <p style="margin: 0; color: #555">
+      <strong>Mensaje del Sistema:</strong>
+      {{ mensaje || "Esperando acción..." }}
+    </p>
+  </div>
+
+  <h3 style="color: #333">Servicios Activos</h3>
+  <ul style="list-style-type: none; padding: 0">
+    <li
+      *ngFor="let s of servicios"
+      style="
+        background: white;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      "
+    >
+      <strong style="color: #d32f2f">ID {{ s.id }}</strong> |
+      <strong>{{ s.nombre_servicio }}</strong>
+      <br />
+      <small style="color: #666"
+        >Área: {{ s.area_usuaria }} — Registrado por:
+        {{ s.registrado_por }}</small
+      >
+    </li>
+  </ul>
+</div>
