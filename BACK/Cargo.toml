@@ -5,3 +5,7 @@ edition = "2024"
 
 [dependencies]
 rusqlite = { version = "0.39.0", features = ["bundled"] }
+
+[[bin]]
+name = "compilardb"
+path = "src/compilardb.rs"

@@ -1,9 +1,4 @@
-<div
-  style="
-    padding: 30px;
-    font-family: &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana, sans-serif;
-  "
->
+<div style="padding: 30px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
   <h2 style="color: #2c3e50">Gestor de Vulnerabilidades SOC</h2>
   <hr style="border: 1px solid #eee; margin-bottom: 20px" />
 
@@ -34,121 +29,105 @@
         </button>
       </div>
     </div>
-
   </div>
 
-  <div
-    style="
-      background: #f8f9fa;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      border: 1px solid #ddd;
-    "
-  >
+
+  <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
     <h3 style="margin-top: 0; color: #333">1. Ingesta de APIs / URLs</h3>
     <p style="color: #666; font-size: 14px">
       Copia las filas desde tu Excel (URL y Método) y haz Ctrl+V o Clic Derecho
       -> Pegar dentro del recuadro punteado.
     </p>
 
-    <div
-      (paste)="procesarPegadoExcel($event)"
-      contenteditable="true"
-      style="
-        border: 2px dashed #0056b3;
-        background: #e9f2ff;
-        padding: 30px;
-        text-align: center;
-        border-radius: 8px;
-        outline: none;
-        cursor: text;
-      "
-    >
-      <span style="color: #0056b3; font-weight: bold"
-        >Haz clic aquí y presiona Ctrl + V para pegar desde Excel</span
-      >
+    <div (paste)="procesarPegadoExcel($event)" contenteditable="true" style="border: 2px dashed #0056b3; background: #e9f2ff; padding: 30px; text-align: center; border-radius: 8px; outline: none; cursor: text;">
+      <span style="color: #0056b3; font-weight: bold">Haz clic aquí y presiona Ctrl + V para pegar desde Excel</span>
+    </div>
+
+    <div *ngIf="endpointsBaseDatos.length > 0" style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 15px;">
+      <button (click)="mostrarEndpointsGuardados = !mostrarEndpointsGuardados" 
+              style="background: #e9ecef; color: #333; border: 1px solid #ccc; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <span>{{ mostrarEndpointsGuardados ? '🔽 Ocultar' : '▶️ Ver' }} APIs en Alcance ({{ endpointsBaseDatos.length }})</span>
+      </button>
+
+      <div *ngIf="mostrarEndpointsGuardados" style="margin-top: 15px; max-height: 250px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px;">
+        <table style="width: 100%; border-collapse: collapse; background: white; font-size: 13px;">
+          <thead style="position: sticky; top: 0; background: #f1f1f1; z-index: 1;">
+            <tr>
+              <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: left; width: 60px;">ID</th>
+              <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: left;">URL Registrada</th>
+              <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center; width: 100px;">Método</th>
+              <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: center; width: 120px;">Estado API</th>
+            </tr>
+          </thead>
+<tbody>
+            <tr *ngFor="let ep of endpointsBaseDatos" style="border-bottom: 1px solid #eee;">
+              <td style="padding: 8px; color: #666;">#{{ ep.id }}</td>
+              <td style="padding: 8px; font-family: monospace; color: #0056b3;">{{ ep.url_endpoint }}</td>
+              <td style="padding: 8px; text-align: center;">
+                <span style="background: #e9ecef; padding: 3px 6px; border-radius: 4px; font-weight: bold;">{{ ep.metodo_http }}</span>
+              </td>
+<td style="padding: 8px; text-align: center;">
+                <span [ngStyle]="{
+                        'background': ep.estado_api === 'Vulnerable' ? '#dc3545' : 
+                                      ep.estado_api === 'Riesgo Aceptado' ? '#fd7e14' :
+                                      ep.estado_api === 'Segura (Parchada)' ? '#198754' : 
+                                      ep.estado_api === 'Limpia (Sin hallazgos)' ? '#0d6efd' : '#6c757d',
+                        'color': 'white', 'padding': '4px 8px', 'border-radius': '12px', 'font-size': '11px', 'font-weight': 'bold', 'display': 'inline-block'
+                      }">
+                  {{ ep.estado_api }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div *ngIf="endpointsExtraidos.length > 0" style="margin-top: 20px">
-      <h4 style="color: #28a745">
-        ✓ Vista Previa ({{ endpointsExtraidos.length }} APIs detectadas)
-      </h4>
-
-      <table
-        style="
-          width: 100%;
-          border-collapse: collapse;
-          background: white;
-          border: 1px solid #ddd;
-        "
-      >
+      <h4 style="color: #28a745">✓ Vista Previa ({{ endpointsExtraidos.length }} APIs detectadas)</h4>
+      <table style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd;">
         <thead>
           <tr style="background: #f1f1f1">
-            <th style="padding: 10px; border: 1px solid #ddd; text-align: left">
-              URL / Endpoint
-            </th>
-            <th style="padding: 10px; border: 1px solid #ddd; text-align: left">
-              Método
-            </th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left">URL / Endpoint</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left">Método</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let endpoint of endpointsExtraidos">
-            <td
-              style="
-                padding: 8px;
-                border: 1px solid #ddd;
-                font-family: monospace;
-              "
-            >
-              {{ endpoint.url_endpoint }}
-            </td>
-            <td style="padding: 8px; border: 1px solid #ddd">
-              <span
-                style="
-                  background: #eee;
-                  padding: 3px 6px;
-                  border-radius: 4px;
-                  font-size: 12px;
-                  font-weight: bold;
-                "
-              >
-                {{ endpoint.metodo_http }}
-              </span>
+            <td style="padding: 8px; border: 1px solid #ddd; font-family: monospace;">{{ endpoint.url_endpoint }}</td>
+            <td style="padding: 8px; border: 1px solid #ddd;">
+              <span style="background: #eee; padding: 3px 6px; border-radius: 4px; font-size: 12px; font-weight: bold;">{{ endpoint.metodo_http }}</span>
             </td>
           </tr>
         </tbody>
       </table>
-      <button
-        (click)="guardarEnBD()"
-        style="
-          margin-top: 15px;
-          padding: 10px 20px;
-          background: #0056b3;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          font-weight: bold;
-          cursor: pointer;
-        "
-      >
+      <button (click)="guardarEnBD()" style="margin-top: 15px; padding: 10px 20px; background: #0056b3; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
         Guardar Endpoints en la Base de Datos
       </button>
     </div>
   </div>
-<div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffeeba;">
+
+
+  <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ffeeba;">
     <h3 style="margin-top: 0; color: #856404;">2. Cargar Reporte de Escaneo (Fortify)</h3>
     <p style="color: #666; font-size: 14px;">Sube el reporte en PDF para extraer las vulnerabilidades automáticamente.</p>
     
-    <button (click)="procesarReporteFortify()" 
-            style="padding: 10px 20px; background: #ffc107; color: #212529; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <div style="margin-bottom: 15px; padding: 10px; background: rgba(255,255,255,0.5); border-radius: 4px;">
+      <p style="margin-top: 0; font-size: 14px; color: #555; font-weight: bold;">Tipo de Escaneo:</p>
+      <label style="margin-right: 20px; cursor: pointer;">
+        <input type="radio" name="tipoEscaneo" value="Inicial" [(ngModel)]="tipoEscaneo"> Inicial (Línea Base)
+      </label>
+      <label style="cursor: pointer;">
+        <input type="radio" name="tipoEscaneo" value="Retest" [(ngModel)]="tipoEscaneo"> Retest (Validación de Parches)
+      </label>
+    </div>
+    
+    <button (click)="procesarReporteFortify()" style="padding: 10px 15px; background: #ffc107; color: #333; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
       📄 Examinar PDF de Fortify
     </button>
-  </div>
-<div *ngIf="hallazgosExtraidos.length > 0" style="margin-top: 20px;">
+    
+    <div *ngIf="hallazgosExtraidos.length > 0" style="margin-top: 20px;">
       <h4 style="color: #dc3545;">🚨 Vulnerabilidades Detectadas ({{ hallazgosExtraidos.length }})</h4>
-      
       <p style="font-size: 14px; color: #555; margin-top: -10px; margin-bottom: 15px;">
         📅 <strong>Fecha del reporte:</strong> {{ hallazgosExtraidos[0].fecha_escaneo }}
       </p>
@@ -180,78 +159,207 @@
           </tr>
         </tbody>
       </table>
-      
- <button (click)="guardarReporteVulnerabilidades()" style="margin-top: 15px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+      <button (click)="guardarReporteVulnerabilidades()" style="margin-top: 15px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
         Vincular a Endpoints y Guardar
       </button>
-      
     </div>
-  <div
-    style="
-      background: #e9ecef;
-      padding: 10px;
-      border-left: 4px solid #6c757d;
-      margin-bottom: 20px;
-    "
-  >
+  </div>
+
+
+  <div style="background: #e9ecef; padding: 10px; border-left: 4px solid #6c757d; margin-bottom: 20px;">
     <p style="margin: 0; color: #555">
-      <strong>Mensaje del Sistema:</strong>
-      {{ mensaje || "Esperando acción..." }}
+      <strong>Mensaje del Sistema:</strong> {{ mensaje || "Esperando acción..." }}
     </p>
   </div>
 
-  <h3 style="color: #333">Servicios Activos</h3>
-  <ul style="list-style-type: none; padding: 0">
-    <li
-      *ngFor="let s of servicios"
-      style="
-        background: white;
-        border: 1px solid #ddd;
-        padding: 15px;
-        margin-bottom: 10px;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-      "
-    >
-      <strong style="color: #d32f2f">ID {{ s.id }}</strong> |
-      <strong>{{ s.nombre_servicio }}</strong>
-      <br />
-      <small style="color: #666"
-        >Área: {{ s.area_usuaria }} — Registrado por:
-        {{ s.registrado_por }}</small
-      >
-    </li>
-  </ul>
-</div>
-<div style="background: #e9ecef; padding: 20px; border-radius: 8px; margin-top: 30px; border: 1px solid #ced4da;">
-    <h3 style="margin-top: 0; color: #495057;">📊 Dashboard: Estado Actual de Vulnerabilidades</h3>
+
+ <div style="background: #e9ecef; padding: 20px; border-radius: 8px; margin-top: 30px; border: 1px solid #ced4da;">
+    <h3 style="margin-top: 0; color: #495057;">📊 Dashboard de Seguridad: Indicadores Clave</h3>
     
+    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+      <div style="flex: 1; background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #0d6efd; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <p style="margin: 0; color: #666; font-size: 14px;">APIs en Alcance (Ingestadas)</p>
+        <h2 style="margin: 5px 0 0 0; color: #0d6efd;">{{ metricasActuales.total_endpoints }}</h2>
+      </div>
+      <div style="flex: 1; background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #dc3545; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <p style="margin: 0; color: #666; font-size: 14px;">Vulnerabilidades Abiertas (Riesgo)</p>
+        <h2 style="margin: 5px 0 0 0; color: #dc3545;">{{ metricasActuales.hallazgos_abiertos }}</h2>
+      </div>
+      <div style="flex: 1; background: white; padding: 15px; border-radius: 8px; border-left: 5px solid #198754; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <p style="margin: 0; color: #666; font-size: 14px;">Vulnerabilidades Levantadas (Progreso)</p>
+        <h2 style="margin: 5px 0 0 0; color: #198754;">{{ metricasActuales.hallazgos_levantados }}</h2>
+      </div>
+    </div>
+
+    <div *ngIf="historialReportes.length > 0" style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 20px;">
+      <h4 style="margin-top: 0; color: #495057; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+        ⏳ Historial de Auditoría (Línea de Tiempo)
+      </h4>
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+        
+        <div *ngFor="let reporte of historialReportes; let i = index" 
+             style="display: flex; align-items: center; background: #f8f9fa; padding: 10px; border-radius: 6px; border-left: 4px solid;"
+             [ngStyle]="{'border-left-color': reporte.tipo_solicitud === 'Inicial' ? '#0d6efd' : '#ffc107'}">
+          
+          <div style="min-width: 40px; text-align: center; font-weight: bold; color: #aaa;">#{{ i + 1 }}</div>
+          
+          <div style="flex: 1;">
+            <span style="font-weight: bold; color: #333; margin-right: 10px;">{{ reporte.tipo_solicitud }}</span>
+            <span style="color: #666; font-size: 13px;">{{ reporte.scan_name }}</span>
+            <br>
+            <small style="color: #0d6efd; font-weight: bold;">
+              Subido al sistema: {{ reporte.fecha_subida }}
+            </small>
+          </div>
+          
+          <div style="font-size: 12px; color: #555; background: #e9ecef; padding: 6px 10px; border-radius: 4px; text-align: right; border: 1px solid #ddd;">
+            <strong>Fecha del PDF:</strong><br>
+            🗓️ {{ reporte.fecha_escaneo ? reporte.fecha_escaneo.split('Server')[0] : '---' }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <table *ngIf="hallazgosBaseDatos.length > 0" style="width: 100%; border-collapse: collapse; background: white; border: 1px solid #ddd; font-size: 14px;">
       <thead>
         <tr style="background: #343a40; color: white;">
-          <th style="padding: 10px; text-align: left;">ID</th>
-          <th style="padding: 10px; text-align: left;">Severidad</th>
+          <th style="padding: 10px; text-align: left;">Sev.</th>
           <th style="padding: 10px; text-align: left;">Vulnerabilidad</th>
-          <th style="padding: 10px; text-align: left;">Endpoint</th>
-          <th style="padding: 10px; text-align: center;">Estado</th>
+          <th style="padding: 10px; text-align: left;">Endpoint Afectado</th>
+          <th style="padding: 10px; text-align: center;">Fecha Detección</th>
+          <th style="padding: 10px; text-align: center;">Fecha Cierre</th>
+          <th style="padding: 10px; text-align: center;">Estado Actual</th>
+          <th style="padding: 10px; text-align: center;">Acción</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let h of hallazgosBaseDatos">
-          <td style="padding: 8px; border: 1px solid #ddd; color: #666;">#{{ h.id }}</td>
           <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;"
               [ngStyle]="{'color': h.severidad === 'Crítica' ? 'red' : h.severidad === 'Alta' ? 'orange' : h.severidad === 'Media' ? '#d39e00' : 'green'}">
             {{ h.severidad }}
           </td>
-          <td style="padding: 8px; border: 1px solid #ddd;">{{ h.vulnerabilidad }}</td>
+          <td style="padding: 8px; border: 1px solid #ddd;">
+            <strong style="color: #0056b3;">{{ h.vulnerabilidad }}</strong>
+            
+            <div *ngIf="h.justificacion_dev !== ''" 
+                 style="margin-top: 8px; padding: 8px; background: #f8f9fa; border-left: 3px solid #6c757d; border-radius: 4px; font-size: 12px; line-height: 1.4;">
+              <strong style="color: #333;">👤 Aprobado por:</strong> {{ h.aprobado_por }}<br>
+              <strong style="color: #333;">📝 Motivo:</strong> <span style="color: #666;">{{ h.justificacion_dev }}</span>
+            </div>
+          </td>
           <td style="padding: 8px; border: 1px solid #ddd; font-family: monospace;">{{ h.url_endpoint }}</td>
+          
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #555;">
+            {{ h.fecha_registro ? h.fecha_registro.split('Server')[0] : '---' }}
+          </td>
+          
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: #555;">{{ h.fecha_cierre }}</td>
+          
           <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
-            <span style="background: #dc3545; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">
+            <span [ngStyle]="{
+                    'background': h.estado_actual === 'Abierta' ? '#dc3545' : 
+                                  h.estado_actual === 'Levantada' ? '#198754' : 
+                                  h.estado_actual === 'Falso Positivo' ? '#6c757d' : '#fd7e14'
+                  }" 
+                  style="color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">
               {{ h.estado_actual }}
             </span>
           </td>
+
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
+            <button *ngIf="h.estado_actual === 'Abierta'" (click)="abrirModalGestion(h)" 
+                    style="background: #0d6efd; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
+              ⚙️ Gestionar
+            </button>
+          </td>
+
         </tr>
       </tbody>
     </table>
-    <p *ngIf="hallazgosBaseDatos.length === 0" style="color: #666;">No hay vulnerabilidades registradas para este servicio.</p>
+    <p *ngIf="hallazgosBaseDatos.length === 0" style="color: #666; font-style: italic;">No hay vulnerabilidades registradas para este servicio.</p>
+  </div>
+</div>
+
+<div *ngIf="mostrarModalGestion" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000;">
+  <div style="background: white; padding: 25px; border-radius: 8px; width: 500px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+    <h3 style="margin-top: 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px;">⚙️ Gestionar Hallazgo #{{ hallazgoSeleccionado?.id }}</h3>
+    
+    <p style="font-size: 14px; color: #555;"><strong>Vulnerabilidad:</strong> {{ hallazgoSeleccionado?.vulnerabilidad }}</p>
+    <p style="font-size: 14px; color: #555; font-family: monospace; word-break: break-all;"><strong>Endpoint:</strong> {{ hallazgoSeleccionado?.url_endpoint }}</p>
+    
+    <div style="margin-top: 15px;">
+      <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px;">Cambiar estado a:</label>
+      <select [(ngModel)]="estadoGestion" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px;">
+        <option value="Falso Positivo">Falso Positivo</option>
+        <option value="Excepción">Excepción de Negocio</option>
+      </select>
+    </div>
+
+<div style="margin-top: 15px;">
+      <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px;">Aprobado por (Jefatura / CISO): <span style="color: red;">*</span></label>
+      <input type="text" [(ngModel)]="aprobadorGestion" placeholder="Ej. Ing. Juan Pérez" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px;">
+    </div>
+
+<div style="margin-top: 15px;">
+      <label style="display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px;">Justificación Técnica: <span style="color: red;">*</span></label>
+      <textarea [(ngModel)]="justificacionGestion" rows="3" placeholder="Explica por qué se toma esta decisión..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; resize: none;"></textarea>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+      <button (click)="cerrarModalGestion()" style="padding: 8px 15px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Cancelar</button>
+      <button (click)="guardarGestionHallazgo()" style="padding: 8px 15px; background: #198754; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Guardar Decisión</button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!sesionIniciada" style="height: 100vh; display: flex; justify-content: center; align-items: center; background: #f4f6f9; font-family: 'Segoe UI', Tahoma, sans-serif;">
+  <div style="background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; width: 350px;">
+    <h2 style="color: #0d6efd; margin-top: 0;">🛡️ SOC Manager</h2>
+    <p style="color: #666; margin-bottom: 20px;">Identificación de Analista requerida para trazabilidad.</p>
+    
+    <input type="text" [(ngModel)]="usuarioActual" (keyup.enter)="iniciarSesion()" placeholder="Ingresa tu nombre o usuario" 
+           style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 16px; margin-bottom: 20px; box-sizing: border-box;">
+    
+    <button (click)="iniciarSesion()" [disabled]="!usuarioActual" 
+            style="width: 100%; padding: 12px; background: #0d6efd; color: white; border: none; border-radius: 4px; font-weight: bold; font-size: 16px; cursor: pointer;">
+      Iniciar Sesión
+    </button>
+  </div>
+</div>
+
+<div *ngIf="sesionIniciada" style="padding: 30px; font-family: 'Segoe UI', Tahoma, sans-serif;">
+  
+  <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; margin-bottom: 20px; padding-bottom: 10px;">
+    <h2 style="color: #2c3e50; margin: 0;">Gestor de Vulnerabilidades SOC</h2>
+    <div style="background: #e9ecef; padding: 5px 15px; border-radius: 20px; font-size: 14px; color: #555; display: flex; align-items: center; gap: 10px;">
+      <span>👤 Analista: <strong>{{ usuarioActual }}</strong></span>
+      <button (click)="cerrarSesion()" style="background: none; border: none; color: #dc3545; cursor: pointer; font-weight: bold; text-decoration: underline;">Salir</button>
+    </div>
+  </div>
+
+  <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-top: 20px;">
+        <h4 style="margin-top: 0; color: #495057; border-bottom: 1px solid #eee; padding-bottom: 8px;">🔗 Trazabilidad del Reporte</h4>
+        
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 200px;">
+            <label style="font-size: 12px; font-weight: bold; color: #555;">Remitente del Correo (Evidencia):</label>
+            <input type="text" [(ngModel)]="remitenteCorreo" placeholder="ej. ciso@reniec.gob.pe" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+          </div>
+          
+          <div style="flex: 1; min-width: 200px;">
+            <label style="font-size: 12px; font-weight: bold; color: #555;">Fecha de Recepción del Correo:</label>
+            <input type="datetime-local" [(ngModel)]="fechaRecepcionCorreo" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+          </div>
+
+          <div style="flex: 1; min-width: 200px;">
+            <label style="font-size: 12px; font-weight: bold; color: #555;">Ruta Evidencia / Ticket Jira:</label>
+            <input type="text" [(ngModel)]="rutaEvidencia" placeholder="ej. TICKET-SOC-405" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+          </div>
+        </div>
+      </div>
+      <button (click)="guardarReporteVulnerabilidades()" style="margin-top: 15px; padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">
+        Vincular a Endpoints y Guardar
+      </button>
+
   </div>

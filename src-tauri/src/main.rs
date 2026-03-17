@@ -18,6 +18,14 @@ use commands::hallazgo_cmd::guardar_reporte_completo_controller;
 
 use commands::hallazgo_cmd::listar_hallazgos_controller;
 
+use commands::hallazgo_cmd::obtener_metricas_controller;
+
+use commands::hallazgo_cmd::listar_historial_reportes_controller;
+
+use commands::hallazgo_cmd::actualizar_estado_controller;
+
+use commands::endpoint_cmd::listar_endpoints_controller;
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -27,7 +35,11 @@ fn main() {
             guardar_endpoints_controller,
             leer_pdf_controller,
             guardar_reporte_completo_controller,
-            listar_hallazgos_controller
+            listar_hallazgos_controller,
+            obtener_metricas_controller,
+            listar_historial_reportes_controller,
+            actualizar_estado_controller,
+            listar_endpoints_controller
 
         ])
         .run(tauri::generate_context!())

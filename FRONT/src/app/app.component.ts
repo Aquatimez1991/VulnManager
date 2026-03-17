@@ -24,6 +24,31 @@ export interface HallazgoVista {
   vulnerabilidad: string;
   severidad: string;
   estado_actual: string;
+  fecha_registro: string;
+  fecha_cierre: string;
+  justificacion_dev: string; // <-- AÑADIR
+  aprobado_por: string;      // <-- AÑADIR
+}
+
+export interface DashboardMetricas {
+  total_endpoints: number;
+  hallazgos_abiertos: number;
+  hallazgos_levantados: number;
+}
+
+export interface ReporteHistorial {
+  id: number;
+  tipo_solicitud: string;
+  fecha_escaneo: string;
+  scan_name: string;
+  fecha_subida: string;
+}
+
+export interface EndpointVista {
+  id: number;
+  url_endpoint: string;
+  metodo_http: string;
+  estado_api: string;
 }
 
 @Component({
@@ -34,6 +59,28 @@ export interface HallazgoVista {
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
+
+  // --- VARIABLES DE SESIÓN Y TRAZABILIDAD ---
+  sesionIniciada: boolean = false;
+  usuarioActual: string = '';
+
+  // Variables para el formulario del reporte
+  remitenteCorreo: string = '';
+  fechaRecepcionCorreo: string = '';
+  rutaEvidencia: string = '';
+
+  iniciarSesion() {
+    if (this.usuarioActual.trim().length > 0) {
+      this.sesionIniciada = true;
+      this.cargarTabla(); // Cargamos los servicios una vez que entra
+    }
+  }
+
+  cerrarSesion() {
+    this.sesionIniciada = false;
+    this.usuarioActual = '';
+    this.servicioSeleccionadoId = null;
+  }
 
   
   servicios: Servicio[] = [];
@@ -76,7 +123,7 @@ async cargarTabla() {
       await invoke('crear_servicio_controller', {
         nombre: this.nuevoServicioNombre,
         area: this.nuevoServicioArea,
-        registradoPor: 'Elias' // Dejamos tu nombre como el auditor responsable
+        registradoPor: this.usuarioActual // Dejamos tu nombre como el auditor responsable
       });
 
       this.nuevoServicioNombre = '';
@@ -171,6 +218,7 @@ procesarPegadoExcel(event: ClipboardEvent) {
       
       this.mensaje = respuesta;
       this.endpointsExtraidos = []; // Limpiamos la tabla visual tras guardar
+      this.cargarDashboard(idServicio);
     } catch (error) {
       this.mensaje = 'Error del servidor: ' + error;
     }
@@ -180,6 +228,7 @@ procesarPegadoExcel(event: ClipboardEvent) {
   hallazgosExtraidos: HallazgoPreview[] = [];
 
   rutaPdfSeleccionado: string = '';
+  tipoEscaneo: string = 'Inicial';
 
   async procesarReporteFortify() {
     try {
@@ -246,12 +295,19 @@ async guardarReporteVulnerabilidades() {
 
     try {
       this.mensaje = "Iniciando transacción relacional en SQLite...";
-      const payload = {
-        servicio_id: this.servicioSeleccionadoId, // <-- ¡AHORA SÍ ES 100% DINÁMICO!
-        ruta_pdf: this.rutaPdfSeleccionado,
-        fecha_escaneo: this.hallazgosExtraidos[0]?.fecha_escaneo || '',
-        hallazgos: this.hallazgosExtraidos
-      };
+const payload = {
+     servicio_id: this.servicioSeleccionadoId,
+     tipo_solicitud: this.tipoEscaneo,
+     ruta_pdf: this.rutaPdfSeleccionado,
+     fecha_escaneo: this.hallazgosExtraidos[0]?.fecha_escaneo || '',
+     hallazgos: this.hallazgosExtraidos,
+     // 👇 AÑADIR ESTO AL ENVIAR A RUST:
+     ruta_evidencia: this.rutaEvidencia,
+     analista_soc: this.usuarioActual, // Quien tiene la sesión abierta
+     remitente_correo: this.remitenteCorreo,
+     fecha_recepcion_correo: this.fechaRecepcionCorreo,
+     registrado_por: this.usuarioActual
+   };
 
       const respuesta = await invoke<string>('guardar_reporte_completo_controller', { payload });
       this.mensaje = respuesta;
@@ -266,13 +322,71 @@ async guardarReporteVulnerabilidades() {
   }
 
   hallazgosBaseDatos: HallazgoVista[] = [];
+  metricasActuales: DashboardMetricas = { total_endpoints: 0, hallazgos_abiertos: 0, hallazgos_levantados: 0 };
 
-  async cargarDashboard(servicioId: number) {
+  historialReportes: ReporteHistorial[] = [];
+  endpointsBaseDatos: EndpointVista[] = [];
+  mostrarEndpointsGuardados: boolean = false; // Controla el botón de Ver/Ocultar
+
+async cargarDashboard(servicioId: number) {
   try {
     this.hallazgosBaseDatos = await invoke<HallazgoVista[]>('listar_hallazgos_controller', { servicioId });
+    this.metricasActuales = await invoke<DashboardMetricas>('obtener_metricas_controller', { servicioId });
+    this.historialReportes = await invoke<ReporteHistorial[]>('listar_historial_reportes_controller', { servicioId });
+    // 👇 NUEVA LÍNEA: Traer el alcance
+    this.endpointsBaseDatos = await invoke<EndpointVista[]>('listar_endpoints_controller', { servicioId });
   } catch (error) {
     console.error("Error cargando dashboard:", error);
   }
 }
+
+// --- VARIABLES PARA EL MODAL DE GESTIÓN ---
+  mostrarModalGestion: boolean = false;
+  hallazgoSeleccionado: HallazgoVista | null = null;
+  estadoGestion: string = 'Falso Positivo';
+  justificacionGestion: string = '';
+  aprobadorGestion: string = '';
+
+  abrirModalGestion(hallazgo: HallazgoVista) {
+    this.hallazgoSeleccionado = hallazgo;
+    this.estadoGestion = 'Falso Positivo'; // Por defecto
+    this.justificacionGestion = '';
+    this.aprobadorGestion = '';
+    this.mostrarModalGestion = true;
+  }
+
+  cerrarModalGestion() {
+    this.mostrarModalGestion = false;
+    this.hallazgoSeleccionado = null;
+  }
+
+  async guardarGestionHallazgo() {
+    if (!this.hallazgoSeleccionado || !this.justificacionGestion.trim() || !this.aprobadorGestion.trim()) {
+      this.mensaje = "⚠️ Debes ingresar una justificación y el nombre del aprobador.";
+      return;
+    }
+
+    try {
+      this.mensaje = "Actualizando estado del hallazgo...";
+      const payload = {
+        hallazgo_id: this.hallazgoSeleccionado.id,
+        nuevo_estado: this.estadoGestion,
+        justificacion: this.justificacionGestion,
+        aprobado_por: this.aprobadorGestion
+      };
+
+      const respuesta = await invoke<string>('actualizar_estado_controller', { payload });
+      this.mensaje = respuesta;
+      
+      this.cerrarModalGestion();
+      
+      // Refrescamos el dashboard para ver el cambio de color al instante
+      if (this.servicioSeleccionadoId) {
+        this.cargarDashboard(this.servicioSeleccionadoId);
+      }
+    } catch (error) {
+      this.mensaje = 'Error al actualizar: ' + error;
+    }
+  }
 
 }
