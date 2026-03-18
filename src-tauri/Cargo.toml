@@ -26,4 +26,5 @@ tauri-plugin-log = "2"
 rusqlite = { version = "0.30.0", features = ["bundled"] }
 tauri-plugin-dialog = "2.6.0"
 pdf-extract = "0.10.0"
+directories = "6.0.0"
 

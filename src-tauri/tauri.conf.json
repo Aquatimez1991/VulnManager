@@ -2,9 +2,9 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "VulnManager",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.soc.vulnmanager",
   "build": {
-    "frontendDist": "FRONT/dist/web-app/browser",
+    "frontendDist": "../FRONT/dist/web-app/browser",
     "devUrl": "http://localhost:4200",
     "beforeDevCommand": "npm run start --prefix FRONT",
     "beforeBuildCommand": "npm run build --prefix FRONT"
