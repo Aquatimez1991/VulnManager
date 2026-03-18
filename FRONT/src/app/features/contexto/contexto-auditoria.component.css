@@ -1,0 +1,68 @@
+.page-header { margin-bottom: 24px; }
+.page-header h2 { margin: 0 0 4px 0; font-size: 24px; color: var(--text-main); }
+.page-header p { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+.alert-box { padding: 12px 16px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 12px; margin-bottom: 20px; font-weight: 500; font-size: 14px; animation: slideDown 0.3s ease; }
+.success-alert { background-color: var(--success-bg); color: var(--success); border: 1px solid #79f2c0; }
+.error-alert { background-color: var(--danger-bg); color: var(--danger); border: 1px solid #ffbdad; }
+.info-alert { background-color: var(--info-bg); color: var(--info); border: 1px solid #79e2f2; }
+
+.context-grid {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 24px;
+}
+
+.card-header { padding: 16px 24px; border-bottom: 1px solid var(--border-color); background-color: #fafbfc; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.card-header h3 { margin: 0; font-size: 16px; color: var(--text-main); }
+.p-0 { padding: 0 !important; }
+
+.form-body {
+  padding: 24px;
+}
+
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-main); margin-bottom: 8px; }
+.required { color: var(--danger); }
+.w-full { width: 100%; }
+
+/* TABLE */
+.table-container { max-height: calc(100vh - 220px); overflow-y: auto; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+.data-table thead th { position: sticky; top: 0; background: #fafbfc; padding: 12px 16px; border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 11px; text-transform: uppercase; font-weight: 600; z-index: 10; }
+.data-table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+.data-table tbody tr:hover { background: rgba(9, 30, 66, 0.02); }
+
+.w-80 { width: 80px; }
+.w-120 { width: 130px; }
+.text-center { text-align: center; }
+.font-bold { font-weight: bold; }
+.text-primary { color: var(--primary); }
+.text-muted { color: var(--text-muted); }
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.active-pill {
+  background-color: var(--success);
+  color: white;
+}
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; display: block; opacity: 0.5; }
+
+@keyframes slideDown { 
+  from { opacity: 0; transform: translateY(-10px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}

@@ -39,7 +39,7 @@ pub fn listar_endpoints_por_servicio(conn: &rusqlite::Connection, servicio_id: i
                 CASE 
                     WHEN SUM(CASE WHEN h.estado_actual = 'Abierta' THEN 1 ELSE 0 END) > 0 THEN 'Vulnerable'
                     WHEN SUM(CASE WHEN h.estado_actual IN ('Excepción', 'Falso Positivo') THEN 1 ELSE 0 END) > 0 THEN 'Riesgo Aceptado'
-                    WHEN SUM(CASE WHEN h.estado_actual = 'Levantada' THEN 1 ELSE 0 END) > 0 THEN 'Segura (Parchada)'
+                    WHEN SUM(CASE WHEN h.estado_actual = 'Levantada' THEN 1 ELSE 0 END) > 0 THEN 'Segura (Levantada)'
                     WHEN (SELECT COUNT(*) FROM SOLICITUDES_ESCANEO WHERE servicio_id = ?1) > 0 THEN 'Limpia (Sin hallazgos)'
                     ELSE 'Sin evaluar'
                 END as estado_api

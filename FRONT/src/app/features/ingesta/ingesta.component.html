@@ -1,0 +1,100 @@
+<div class="page-header">
+  <h2>Ingesta de Alcance APIs</h2>
+  <div class="context-badge" *ngIf="appStore.servicioSeleccionado()">
+    <span class="icon">📁</span> Aplicación Actual: [{{ appStore.servicioSeleccionado()?.id }}] {{ appStore.servicioSeleccionado()?.nombre_servicio }} ({{ appStore.servicioSeleccionado()?.area_usuaria }})
+  </div>
+  <p>Copia y pega desde Excel o CSV los endpoints validados para este servicio.</p>
+</div>
+
+<div class="alert-box info-alert" *ngIf="mensaje()">
+  <span class="icon">ℹ️</span>
+  <span>{{ mensaje() }}</span>
+</div>
+
+<div class="ingesta-container">
+  
+  <div class="paste-zone-wrapper card">
+    <div class="card-header">
+      <h3>Pegar desde Portapapeles</h3>
+      <span class="badge">Columnas: URL, Método</span>
+    </div>
+    <div class="card-body">
+      <div 
+        class="paste-area" 
+        contenteditable="true" 
+        (paste)="procesarPegadoExcel($event)">
+        <div class="paste-placeholder">
+          <span class="icon">📋</span>
+          <p>Haz clic aquí y presiona <strong>Ctrl + V</strong> para pegar desde Excel</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-section" *ngIf="endpointsExtraidos().length > 0">
+    <div class="section-header">
+      <h3 class="text-success">✓ Vista Previa ({{ endpointsExtraidos().length }} APIs detectadas)</h3>
+      <button class="btn-primary" (click)="guardarEnBD()">Guardar Endpoints Mapeados</button>
+    </div>
+    
+    <div class="table-container card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>URL / Endpoint Ruta</th>
+            <th class="text-center w-120">Método HTTP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ep of endpointsExtraidos()">
+            <td class="font-mono">{{ ep.url_endpoint }}</td>
+            <td class="text-center">
+              <span class="method-badge" [attr.data-method]="ep.metodo_http">
+                {{ ep.metodo_http }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <hr class="divider" *ngIf="endpointsBaseDatos().length > 0">
+
+  <div class="scope-section" *ngIf="endpointsBaseDatos().length > 0">
+    <div class="section-header">
+      <h3>Alcance Actual Registrado ({{ endpointsBaseDatos().length }})</h3>
+      <button class="btn-secondary" (click)="toggleMostrarGuardados()">
+        {{ mostrarEndpointsGuardados() ? '🔽 Ocultar' : '▶️ Expandir' }} Tabla de Alcance
+      </button>
+    </div>
+
+    <div class="table-container card mt-12" *ngIf="mostrarEndpointsGuardados()">
+      <table class="data-table relative-head">
+        <thead>
+          <tr>
+            <th class="w-80">ID</th>
+            <th>URL Endpoint Registrada</th>
+            <th class="text-center w-120">Método</th>
+            <th class="text-center w-180">Estado de Seguridad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let ep of endpointsBaseDatos()">
+            <td class="text-muted">#{{ ep.id }}</td>
+            <td class="font-mono text-primary">{{ ep.url_endpoint }}</td>
+            <td class="text-center">
+              <span class="method-badge">{{ ep.metodo_http }}</span>
+            </td>
+            <td class="text-center">
+              <span class="status-pill" [ngClass]="getEstadoClase(ep.estado_api)">
+                {{ ep.estado_api }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

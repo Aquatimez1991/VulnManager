@@ -1,0 +1,222 @@
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h2 {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.page-header p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.loading-overlay {
+  padding: 12px;
+  background-color: var(--info-bg);
+  color: var(--info);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.blur {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* KPI GRID */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  padding: 20px;
+  border-left-width: 4px;
+  border-left-style: solid;
+}
+
+.kpi-blue { border-left-color: var(--primary); }
+.kpi-danger { border-left-color: var(--danger); }
+.kpi-success { border-left-color: var(--success); }
+
+.kpi-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.kpi-header .title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-body h3 {
+  margin: 0 0 4px 0;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.kpi-blue h3 { color: var(--primary); }
+.kpi-danger h3 { color: var(--danger); }
+.kpi-success h3 { color: var(--success); }
+
+.kpi-body p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* TIMELINE STYLES */
+.timeline-card {
+  padding: 0;
+}
+
+.card-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: #fafbfc;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.card-body {
+  padding: 24px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  font-style: italic;
+  background: #fdfdfd;
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.timeline {
+  position: relative;
+  border-left: 2px solid var(--border-color);
+  margin-left: 12px;
+  padding-left: 24px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-icon {
+  position: absolute;
+  left: -32px;
+  top: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 3px solid;
+}
+
+.timeline-primary .timeline-icon { border-color: var(--primary); }
+.timeline-warning .timeline-icon { border-color: var(--warning); }
+
+.timeline-content {
+  background: #fafbfc;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  transition: box-shadow 0.2s;
+}
+
+.timeline-content:hover {
+  box-shadow: var(--shadow-sm);
+  background: white;
+}
+
+.timeline-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.timeline-primary .badge { background: #e6efff; color: var(--primary); }
+.timeline-warning .badge { background: var(--warning-bg); color: #c27000; }
+
+.report-title {
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 14px;
+  flex: 1;
+}
+
+.date {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.timeline-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.detail-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-group .label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.detail-group .value {
+  font-size: 13px;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.value.ticket {
+  color: var(--success);
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.value.raw-date {
+  color: var(--info);
+}

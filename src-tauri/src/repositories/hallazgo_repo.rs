@@ -1,5 +1,4 @@
 use rusqlite::{params, Connection, Result};
-use crate::models::HallazgoExtracted;
 use crate::models::HallazgoVista;
 use crate::models::DashboardMetricas;
 use crate::models::ReporteHistorial;

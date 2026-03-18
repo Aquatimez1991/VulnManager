@@ -1,0 +1,120 @@
+<div class="page-header">
+  <h2>Ingesta de Escaneo (SAST / DAST)</h2>
+  <div class="context-badge" *ngIf="appStore.servicioSeleccionado()">
+    <span class="icon">📁</span> Aplicación Actual: [{{ appStore.servicioSeleccionado()?.id }}] {{ appStore.servicioSeleccionado()?.nombre_servicio }} ({{ appStore.servicioSeleccionado()?.area_usuaria }})
+  </div>
+  <p>Sube reportes en formato PDF de Fortify para extraer hallazgos y vincularlos a la Base de Datos.</p>
+</div>
+
+<div class="alert-box info-alert" *ngIf="mensaje()">
+  <span class="icon">ℹ️</span>
+  <span>{{ mensaje() }}</span>
+</div>
+
+<div class="scanner-layout">
+  <!-- LEFT COLUMN: SETTINGS & TRACEABILITY -->
+  <div class="left-col">
+    <div class="card scan-config">
+      <div class="card-header">
+        <h3>1. Configuración de Escaneo</h3>
+      </div>
+      <div class="card-body">
+        <label class="section-label">Tipo de Escaneo:</label>
+        <div class="radio-group">
+          <label class="radio-container">
+            <input type="radio" name="tipoEscaneo" value="Inicial" [ngModel]="tipoEscaneo()" (ngModelChange)="tipoEscaneo.set($event)">
+            <span class="radio-label">Inicial (Línea Base)</span>
+          </label>
+          <label class="radio-container">
+            <input type="radio" name="tipoEscaneo" value="Retest" [ngModel]="tipoEscaneo()" (ngModelChange)="tipoEscaneo.set($event)">
+            <span class="radio-label">Retest (Validación de Levantamiento)</span>
+          </label>
+        </div>
+
+        <button class="btn-primary w-full mt-16 btn-large" (click)="procesarReporteFortify()">
+          📄 Seleccionar PDF y Analizar
+        </button>
+        <div class="selected-file" *ngIf="rutaPdfSeleccionado()">
+          <span class="icon">📎</span>
+          <span class="path" title="{{ rutaPdfSeleccionado() }}">{{ rutaPdfSeleccionado() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRACEABILITY, APPEARS ONLY IF THERE ARE EXTRACTED THREATS -->
+    <div class="card trace-config mt-16" *ngIf="hallazgosExtraidos().length > 0">
+      <div class="card-header">
+        <h3>2. Trazabilidad de Aprobación</h3>
+      </div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Remitente del Correo (Evidencia):</label>
+          <input type="text" class="input-field" [ngModel]="remitenteCorreo()" (ngModelChange)="remitenteCorreo.set($event)" placeholder="ej. ciso@empresa.com">
+        </div>
+        
+        <div class="form-group">
+          <label>Fecha Recepción del Correo:</label>
+          <input type="datetime-local" class="input-field" [ngModel]="fechaRecepcionCorreo()" (ngModelChange)="fechaRecepcionCorreo.set($event)">
+        </div>
+
+        <div class="form-group">
+          <label>Evidencia / Ticket Jira:</label>
+          <input type="text" class="input-field" [ngModel]="rutaEvidencia()" (ngModelChange)="rutaEvidencia.set($event)" placeholder="ej. JIRA-SEC-405">
+        </div>
+
+        <button class="btn-success w-full mt-16" (click)="guardarReporteVulnerabilidades()">
+          💾 Confirmar y Guardar en SQLite
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN: PREVIEW TABLE -->
+  <div class="right-col">
+    <div class="card preview-card">
+      <div class="card-header flex-between">
+        <h3>Vista Previa de Anomalías detectadas</h3>
+        <span class="badge danger-badge" *ngIf="hallazgosExtraidos().length > 0">
+          {{ hallazgosExtraidos().length }} Hallazgos
+        </span>
+      </div>
+      
+      <div class="card-body p-0">
+        <div class="empty-state" *ngIf="hallazgosExtraidos().length === 0">
+          <span class="icon">🔍</span>
+          <p>No hay datos extraídos. Sube un PDF válido de Fortify para comenzar.</p>
+        </div>
+
+        <div class="table-container" *ngIf="hallazgosExtraidos().length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="w-80 text-center">Sev.</th>
+                <th>Detalles de Vulnerabilidad</th>
+                <th>Impacto & Referencias</th>
+                <th>Endpoint / Archivo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let h of hallazgosExtraidos()">
+                <td class="text-center font-bold" [ngClass]="getSeverityClass(h.severidad)">
+                  {{ h.severidad | uppercase }}
+                </td>
+                <td>
+                  <strong class="text-primary block mb-4">{{ h.titulo }}</strong>
+                  <span class="text-small text-muted block line-clamp-2" title="{{ h.descripcion }}">{{ h.descripcion }}</span>
+                </td>
+                <td>
+                  <span class="text-small text-danger block mb-4"><strong>Impacto:</strong> {{ h.implicacion }}</span>
+                  <span class="text-small text-success block"><strong>Ref:</strong> {{ h.referencia }}</span>
+                </td>
+                <td class="font-mono text-smallbreak-word">{{ h.url_afectada }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

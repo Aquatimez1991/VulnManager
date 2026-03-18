@@ -1,0 +1,38 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="logo">
+        <img src="logo.png" alt="SOC Logo">
+      </div>
+      <h2>SOC Vulnerability Manager</h2>
+      <p>Secure Operations Center</p>
+    </div>
+    
+    <div class="login-body">
+      <div class="form-group">
+        <label for="analystName">Identificación Analista SOC</label>
+        <input 
+          id="analystName"
+          type="text" 
+          class="input-field"
+          [(ngModel)]="usuarioActual" 
+          (keyup.enter)="iniciarSesion()" 
+          placeholder="Ej: jsmith, Juan Pérez..." 
+          autocomplete="off">
+        <small class="helper-text">Requerido para la trazabilidad de auditoría de reportes.</small>
+      </div>
+      
+      <button 
+        class="btn-primary login-btn"
+        (click)="iniciarSesion()" 
+        [disabled]="!usuarioActual.trim()">
+        Acceder al Sistema
+      </button>
+    </div>
+  </div>
+  
+  <div class="login-footer">
+    <img src="firma.png" alt="Firma CSIRT" class="firma-logo">
+    <p>&copy; 2026 CSIRT / SOC Engineering. Powered by Tauri & Rust.</p>
+  </div>
+</div>

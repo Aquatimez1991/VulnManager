@@ -1,0 +1,69 @@
+<div class="app-layout">
+  
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-icon">🛡️</div>
+      <div class="logo-text">
+        <h2>SOC Manager</h2>
+        <span>Vulnerability Center</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <ul>
+        <li>
+          <a routerLink="/contextos" routerLinkActive="active" class="nav-item config-item">
+            <span class="icon">⚙️</span>
+            <span class="text">Gestión de Aplicaciones</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+            <span class="icon">📊</span>
+            <span class="text">Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/ingesta" routerLinkActive="active" class="nav-item">
+            <span class="icon">🔗</span>
+            <span class="text">Ingesta APIs</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/escaner" routerLinkActive="active" class="nav-item">
+            <span class="icon">📄</span>
+            <span class="text">Escáner (Fortify)</span>
+          </a>
+        </li>
+        <li>
+          <a routerLink="/vulnerabilidades" routerLinkActive="active" class="nav-item">
+            <span class="icon">🚨</span>
+            <span class="text">Vulnerabilidades</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-profile">
+        <div class="avatar">{{ appStore.analista().charAt(0) | uppercase }}</div>
+        <div class="user-info">
+          <span class="name">{{ appStore.analista() }}</span>
+          <span class="role">Analista SOC</span>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="cerrarSesion()" title="Cerrar sesión">
+        🚪 Salir
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="main-wrapper">
+    <!-- DYNAMIC ROUTE CONTENT -->
+    <main class="content-area">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

@@ -1,0 +1,87 @@
+<div class="page-header">
+  <h2>Gestión de Aplicaciones</h2>
+  <p>Administra los distintos servicios o proyectos que están siendo auditados actualmente.</p>
+</div>
+
+<div class="alert-box" 
+     *ngIf="mensaje()" 
+     [ngClass]="{
+       'success-alert': mensaje()?.tipo === 'success',
+       'error-alert': mensaje()?.tipo === 'error',
+       'info-alert': mensaje()?.tipo === 'info'
+     }">
+  <span class="icon" *ngIf="mensaje()?.tipo === 'success'">✅</span>
+  <span class="icon" *ngIf="mensaje()?.tipo === 'error'">❌</span>
+  <span class="icon" *ngIf="mensaje()?.tipo === 'info'">ℹ️</span>
+  <span>{{ mensaje()?.texto }}</span>
+</div>
+
+<div class="context-grid">
+  <!-- Tarjeta para crear nuevo contexto -->
+  <div class="card create-card">
+    <div class="card-header">
+      <h3>➕ Registrar Nueva Aplicación</h3>
+    </div>
+    <div class="card-body form-body">
+      <div class="form-group">
+        <label>Nombre del Servicio / Aplicación: <span class="required">*</span></label>
+        <input type="text" class="input-field" [ngModel]="nuevoServicioNombre()" (ngModelChange)="nuevoServicioNombre.set($event)" placeholder="Ej. API Pagos B2B">
+      </div>
+      
+      <div class="form-group">
+        <label>Área Usuaria / Dueño (Business Owner): <span class="required">*</span></label>
+        <input type="text" class="input-field" [ngModel]="nuevoServicioArea()" (ngModelChange)="nuevoServicioArea.set($event)" placeholder="Ej. Tribu Finanzas">
+      </div>
+      
+      <button class="btn-primary w-full" [disabled]="cargando()" (click)="crearNuevoServicio()">
+        {{ cargando() ? 'Creando...' : 'Crear Aplicación' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista de contextos existentes -->
+  <div class="card list-card">
+    <div class="card-header">
+      <h3 style="margin: 0; font-size:16px;">Aplicaciones Registradas ({{ appStore.servicios().length }})</h3>
+    </div>
+    
+    <div class="card-body p-0">
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="w-80">ID</th>
+              <th>Servicio</th>
+              <th>Área Usuaria</th>
+              <th class="text-center w-120">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of appStore.servicios()">
+              <td class="font-bold">#{{ s.id }}</td>
+              <td class="text-primary font-bold">{{ s.nombre_servicio }}</td>
+              <td class="text-muted">{{ s.area_usuaria }}</td>
+              <td class="text-center">
+                <button 
+                  *ngIf="s.id !== appStore.servicioSeleccionadoId()"
+                  class="btn-secondary btn-sm" 
+                  (click)="seleccionarContexto(s.id!)">
+                  Seleccionar
+                </button>
+                <div *ngIf="s.id === appStore.servicioSeleccionadoId()" class="status-pill active-pill">
+                  Seleccionado
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Estado Vacío -->
+        <div class="empty-state" *ngIf="appStore.servicios().length === 0">
+          <span class="icon">📁</span>
+          <p>No hay aplicaciones registradas aún. Utiliza el panel izquierdo para crear una.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

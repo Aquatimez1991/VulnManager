@@ -1,0 +1,134 @@
+<div class="page-header">
+  <h2>Gestión de Vulnerabilidades</h2>
+  <div class="context-badge" *ngIf="appStore.servicioSeleccionado()">
+    <span class="icon">📁</span> Aplicación Actual: [{{ appStore.servicioSeleccionado()?.id }}] {{ appStore.servicioSeleccionado()?.nombre_servicio }} ({{ appStore.servicioSeleccionado()?.area_usuaria }})
+  </div>
+  <p>Tabla de control maestro para seguimiento y resolución de hallazgos.</p>
+</div>
+
+<div class="alert-box info-alert" *ngIf="mensaje()">
+  <span class="icon">ℹ️</span>
+  <span>{{ mensaje() }}</span>
+</div>
+
+<div class="card table-card">
+  <div class="card-header flex-between">
+    <h3 style="margin:0; font-size:16px;">Vulnerabilidades Detectadas</h3>
+    
+    <div class="loading-indicator" *ngIf="cargando()">
+      <span class="spinner"></span> Refrescando...
+    </div>
+  </div>
+  
+  <div class="card-body p-0">
+    <div class="table-container">
+      <table class="data-table relative-head">
+        <thead>
+          <tr>
+            <th class="text-center w-80">Sev.</th>
+            <th>Vulnerabilidad</th>
+            <th>Endpoint Afectado</th>
+            <th class="text-center">Fechas (Det. / Cierre)</th>
+            <th class="text-center w-120">Estado</th>
+            <th class="text-center w-80">Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let h of hallazgos()">
+            <td class="text-center font-bold" [ngClass]="getSeverityClass(h.severidad)">
+              {{ h.severidad | uppercase }}
+            </td>
+            
+            <td>
+              <strong class="text-primary">{{ h.vulnerabilidad }}</strong>
+              
+              <!-- JUSTIFICACIÓN (Si hay excepción o Falso positivo) -->
+              <div class="justification-box" *ngIf="h.justificacion_dev">
+                <div class="j-header">
+                  <span class="j-badge">Aprobado por: {{ h.aprobado_por }}</span>
+                </div>
+                <div class="j-body">
+                  <strong>Motivo:</strong> {{ h.justificacion_dev }}
+                </div>
+              </div>
+            </td>
+            
+            <td class="font-mono text-small">{{ h.url_endpoint }}</td>
+            
+            <td class="text-center text-muted text-small">
+              <span class="block">Detección: {{ h.fecha_registro ? h.fecha_registro.split('Server')[0] : '---' }}</span>
+              <span class="block" style="margin-top:4px;">Cierre: {{ h.fecha_cierre || 'Pendiente' }}</span>
+            </td>
+            
+            <td class="text-center">
+              <span class="status-pill inline-block" [ngClass]="getStatusClass(h.estado_actual)">
+                {{ h.estado_actual }}
+              </span>
+            </td>
+
+            <td class="text-center">
+              <button 
+                class="btn-primary minimal-btn action-btn bg-manage" 
+                *ngIf="h.estado_actual === 'Abierta'" 
+                (click)="abrirModalGestion(h)">
+                ⚙️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="empty-state" *ngIf="hallazgos().length === 0 && !cargando()">
+        <span class="icon">🛡️</span>
+        <p>No hay vulnerabilidades registradas para este servicio.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GESTION -->
+<div class="modal-backdrop" *ngIf="mostrarModal()">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3>⚙️ Gestionar Hallazgo #{{ hallazgoSeleccionado()?.id }}</h3>
+      <button class="close-btn" (click)="cerrarModalGestion()">✖</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="info-group">
+        <label>Vulnerabilidad:</label>
+        <div class="info-val text-primary font-bold">{{ hallazgoSeleccionado()?.vulnerabilidad }}</div>
+      </div>
+      <div class="info-group">
+        <label>Endpoint:</label>
+        <div class="info-val font-mono bg-light">{{ hallazgoSeleccionado()?.url_endpoint }}</div>
+      </div>
+
+      <hr class="divider">
+
+      <div class="form-group">
+        <label>Cambiar estado a:</label>
+        <select class="input-field" [ngModel]="estadoGestion()" (ngModelChange)="estadoGestion.set($event)">
+          <option value="Falso Positivo">Falso Positivo</option>
+          <option value="Excepción">Excepción de Negocio</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Aprobado por (Jefatura / CISO): <span class="required">*</span></label>
+        <input type="text" class="input-field" [ngModel]="aprobadorGestion()" (ngModelChange)="aprobadorGestion.set($event)" placeholder="Ej. Ing. Juan Pérez">
+      </div>
+
+      <div class="form-group">
+        <label>Justificación Técnica: <span class="required">*</span></label>
+        <textarea class="input-field resize-none" rows="3" [ngModel]="justificacionGestion()" (ngModelChange)="justificacionGestion.set($event)" placeholder="Explica por qué se toma esta decisión..."></textarea>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalGestion()">Cancelar</button>
+      <button class="btn-success" (click)="guardarGestionHallazgo()">Guardar Decisión</button>
+    </div>
+  </div>
+</div>

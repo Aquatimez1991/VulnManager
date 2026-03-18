@@ -1,0 +1,98 @@
+<div class="page-header">
+  <h2>Dashboard Ejecutivo</h2>
+  <div class="context-badge" *ngIf="appStore.servicioSeleccionado()">
+    <span class="icon">📁</span> Aplicación Actual: [{{ appStore.servicioSeleccionado()?.id }}] {{ appStore.servicioSeleccionado()?.nombre_servicio }} ({{ appStore.servicioSeleccionado()?.area_usuaria }})
+  </div>
+  <p>Métricas y Visibilidad de Auditoría para el Servicio Actual</p>
+</div>
+
+<div class="loading-overlay" *ngIf="cargando()">
+  <div class="spinner"></div> Cargando métricas...
+</div>
+
+<main class="dashboard-content" [class.blur]="cargando()">
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="card kpi-card kpi-blue">
+      <div class="kpi-header">
+        <span class="icon">🔗</span>
+        <span class="title">APIs Ingestadas</span>
+      </div>
+      <div class="kpi-body">
+        <h3>{{ metricas().total_endpoints }}</h3>
+        <p>Total alcance actual</p>
+      </div>
+    </div>
+
+    <div class="card kpi-card kpi-danger">
+      <div class="kpi-header">
+        <span class="icon">🚨</span>
+        <span class="title">Riesgos Abiertos</span>
+      </div>
+      <div class="kpi-body">
+        <h3>{{ metricas().hallazgos_abiertos }}</h3>
+        <p>Pendientes de levantamiento</p>
+      </div>
+    </div>
+
+    <div class="card kpi-card kpi-success">
+      <div class="kpi-header">
+        <span class="icon">✅</span>
+        <span class="title">Vulnerabilidades Levantadas</span>
+      </div>
+      <div class="kpi-body">
+        <h3>{{ metricas().hallazgos_levantados }}</h3>
+        <p>Riesgo mitigado</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE / HISTORY -->
+  <div class="card timeline-card">
+    <div class="card-header">
+      <h3 style="margin: 0; font-size: 16px;">⏳ Historial de Auditoría</h3>
+    </div>
+    <div class="card-body">
+      
+      <div class="empty-state" *ngIf="historial().length === 0 && !cargando()">
+        <p>No hay reportes ni escanéos cargados para este servicio.</p>
+      </div>
+
+      <div class="timeline">
+        <div class="timeline-item" *ngFor="let reporte of historial()"
+             [ngClass]="reporte.tipo_solicitud === 'Inicial' ? 'timeline-primary' : 'timeline-warning'">
+          
+          <div class="timeline-icon"></div>
+          
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <span class="badge">{{ reporte.tipo_solicitud }}</span>
+              <span class="report-title">{{ reporte.scan_name }}</span>
+              <span class="date">{{ reporte.fecha_subida }}</span>
+            </div>
+            
+            <div class="timeline-details">
+              <div class="detail-group">
+                <span class="label">Analista SOC:</span>
+                <span class="value">{{ reporte.analista_soc }}</span>
+              </div>
+              <div class="detail-group">
+                <span class="label">Evidencia / Ticket:</span>
+                <span class="value ticket">{{ reporte.ruta_evidencia }}</span>
+              </div>
+              <div class="detail-group">
+                <span class="label">Remitente CISO:</span>
+                <span class="value">{{ reporte.remitente_correo }}</span>
+              </div>
+              <div class="detail-group">
+                <span class="label">Fecha Informe PDF:</span>
+                <span class="value raw-date">{{ reporte.fecha_escaneo ? reporte.fecha_escaneo.split('Server')[0] : '---' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</main>
