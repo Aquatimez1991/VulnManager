@@ -42,6 +42,9 @@ export interface ReporteHistorial {
   fecha_escaneo: string;
   scan_name: string;
   fecha_subida: string;
+  analista_soc: string;     // <-- AÑADIR
+  remitente_correo: string; // <-- AÑADIR
+  ruta_evidencia: string;   // <-- AÑADIR
 }
 
 export interface EndpointVista {

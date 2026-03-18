@@ -194,8 +194,10 @@ pub fn obtener_metricas(conn: &Connection, servicio_id: i32) -> Result<Dashboard
 
 pub fn listar_historial_reportes(conn: &Connection, servicio_id: i32) -> Result<Vec<ReporteHistorial>> {
     let mut stmt = conn.prepare(
-        // ¡MAGIA AQUÍ! Cambiamos s.fecha_registro por s.fecha_solicitud
-        "SELECT r.id, s.tipo_solicitud, r.fecha_escaneo, r.scan_name, s.fecha_solicitud
+        "SELECT r.id, s.tipo_solicitud, r.fecha_escaneo, r.scan_name, s.fecha_solicitud,
+                COALESCE(r.analista_soc, 'Desconocido'), 
+                COALESCE(r.remitente_correo, '---'), 
+                COALESCE(s.ruta_evidencia, 'Sin ticket')
          FROM REPORTES_SOC r
          JOIN SOLICITUDES_ESCANEO s ON r.solicitud_id = s.id
          WHERE s.servicio_id = ?1
@@ -208,7 +210,10 @@ pub fn listar_historial_reportes(conn: &Connection, servicio_id: i32) -> Result<
             tipo_solicitud: row.get(1)?,
             fecha_escaneo: row.get(2)?,
             scan_name: row.get(3)?,
-            fecha_subida: row.get(4)?, // Ahora sí atrapará el dato correctamente
+            fecha_subida: row.get(4)?,
+            analista_soc: row.get(5)?,     // <-- Atrapamos al analista
+            remitente_correo: row.get(6)?, // <-- Atrapamos el correo
+            ruta_evidencia: row.get(7)?,   // <-- Atrapamos el ticket
         })
     })?;
 

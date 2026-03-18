@@ -203,14 +203,20 @@
           
           <div style="min-width: 40px; text-align: center; font-weight: bold; color: #aaa;">#{{ i + 1 }}</div>
           
-          <div style="flex: 1;">
+<div style="flex: 1;">
             <span style="font-weight: bold; color: #333; margin-right: 10px;">{{ reporte.tipo_solicitud }}</span>
             <span style="color: #666; font-size: 13px;">{{ reporte.scan_name }}</span>
             <br>
             <small style="color: #0d6efd; font-weight: bold;">
               Subido al sistema: {{ reporte.fecha_subida }}
             </small>
-          </div>
+            
+            <div style="margin-top: 6px; padding-top: 6px; border-top: 1px dashed #ccc; font-size: 12px; color: #555; display: flex; gap: 15px; flex-wrap: wrap;">
+              <span>👤 Analista: <strong>{{ reporte.analista_soc }}</strong></span>
+              <span>🎫 Evidencia: <strong style="color: #198754;">{{ reporte.ruta_evidencia }}</strong></span>
+              <span>📧 Remitente: <strong>{{ reporte.remitente_correo }}</strong></span>
+            </div>
+            </div>
           
           <div style="font-size: 12px; color: #555; background: #e9ecef; padding: 6px 10px; border-radius: 4px; text-align: right; border: 1px solid #ddd;">
             <strong>Fecha del PDF:</strong><br>

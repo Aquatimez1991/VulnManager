@@ -71,6 +71,9 @@ pub struct ReporteHistorial {
     pub fecha_escaneo: String,
     pub scan_name: String,
     pub fecha_subida: String,
+    pub analista_soc: String,
+    pub remitente_correo: String,
+    pub ruta_evidencia: String,
 }
 
 #[derive(Debug, Deserialize)]
