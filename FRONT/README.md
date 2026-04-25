@@ -1,59 +1,41 @@
-# WebApp
+# VulnManager Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.22.
+Este directorio contiene la Interfaz de Usuario (UI) de **VulnManager**, desarrollada enteramente utilizando [Angular CLI](https://github.com/angular/angular-cli) versión 19.2.22.
 
-## Development server
+El Front-end está diseñado para funcionar en un entorno de escritorio nativo integrado con el motor de Tauri (ver configuración global del proyecto), y utiliza `signals` de Angular para lograr un entorno altamente reactivo sin las dependencias de las librerías de manejo de estados adicionales (como ngrx).
 
-To start a local development server, run:
+## Arquitectura de la Interfaz
 
+- **Características (`src/app/features`)**: Funcionalidad principal agnóstica modularizada por componentes Single Page o "Standalone".
+  - `dashboard`: Panel administrativo de métricas.
+  - `ingesta`: Validación por Regex y carga de Endpoint APIs de los proyectos analizados.
+  - `escaner`: Procesador y lector visual que se conecta al motor Rust IPC (Tauri) para la lectura de PDFs en binario.
+  - `vulnerabilidades`: Matriz de hallazgos para su tipificación.
+  - `contexto`: Formularios para descargo de analistas y justificaciones de excepciones.
+- **Transversal (`src/app/core`)**: Servicios para interconectar con Tauri SDK (`@tauri-apps/api/core`) y el acceso generalizado al estado compartido con `app-store.service`.
+- **Layouts (`src/app/layout`)**: Maquetación y contenedor principal (`main-layout`) de la barra de navegación/drawer inferior.
+
+> **Nota para los Desarrolladores:**  
+> Esta aplicación invoca de forma intensiva la capa asíncrona de IPC hacia el Backend de Tauri (`invoke`), por lo que no hace llamados HTTP / REST tradicionales. La base de datos es procesada localmente en la PC del usuario a través de SQLite.
+
+## Comandos de Desarrollo del Angular-CLI
+
+Aunque comúnmente querrás ejecutar `cargo tauri dev` desde el directorio raíz, puedes realizar tareas nativas de Angular aquí:
+
+### Levantar el servidor de forma independiente
+Para testear el diseño de UI de forma aislada (sin Tauri), puedes usar:
 ```bash
-ng serve
+npm start
+```
+*No podrás realizar operaciones en base de datos si ejecutas como una SPA web pura.*
+
+### Generar Componentes
+Genera nuevos componentes standalone fácilmente con el CLI:
+```bash
+npx ng generate component mi-nuevo-componente
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+### Ejecutar Pruebas Base y Linter
 ```bash
-ng generate component component-name
+npm run test
 ```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
