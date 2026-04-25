@@ -46,20 +46,22 @@ Se sigue un enfoque iterativo, propio de los modelos híbridos, que combina las 
 
 #### Modelo de Casos de Uso de Requerimiento
 ```mermaid
-usecaseDiagram
-    actor "Analista SOC" as analista
-    actor "Auditor" as auditor
+flowchart LR
+    %% Actores
+    Analista[/"Analista SOC"/]
+    Auditor[/"Auditor"/]
 
-    usecase "CU-01: Definir Alcance Servicio" as CU1
-    usecase "CU-02: Extraer Vulns del PDF" as CU2
-    usecase "CU-03: Aprobar cambio estado" as CU3
-    usecase "CU-04: Supervisar Métricas" as CU4
+    %% Casos de Uso
+    CU1(("CU-01: Definir Alcance Servicio"))
+    CU2(("CU-02: Extraer Vulns del PDF"))
+    CU3(("CU-03: Aprobar cambio estado"))
+    CU4(("CU-04: Supervisar Métricas"))
     
-    analista --> CU1
-    analista --> CU2
-    analista --> CU4
-    auditor --> CU3
-    auditor --> CU4
+    Analista --> CU1
+    Analista --> CU2
+    Analista --> CU4
+    Auditor --> CU3
+    Auditor --> CU4
 ```
 
 #### Plantilla de especificación de casos de uso (Ejemplo: CU-02)
@@ -170,7 +172,7 @@ flowchart TD
     UI[Web UI App / HTML+CSS] --> Components[Angular Standalone Components]
     Components --> State[Signals Global State / AppStore]
     Components --> Services[Angular Injectable Services]
-    Services --> IPC[@tauri-apps/api/core Invoke]
+    Services --> IPC["@tauri-apps/api/core Invoke"]
 ```
 
 ### 3.5 Diagrama de la Capa de Negocio
@@ -191,28 +193,30 @@ flowchart TD
 
 ### 3.7 Diagrama de Componentes
 ```mermaid
-componentDiagram
-    [VulnManager Front-End\n(Angular TS/HTML)] as Front
-    [Tauri Application Runtime\n(Rust API WebView2)] as Tauri
-    [OS Local FileSystem] as Files
+flowchart TD
+    Front["VulnManager Front-End<br>(Angular TS/HTML)"]
+    Tauri["Tauri Application Runtime<br>(Rust API WebView2)"]
+    Files[("OS Local FileSystem")]
 
-    Front -right-> Tauri : JS IPC Proxy
-    Tauri -down-> Files : Rust API rusqlite/directories
-    Tauri -up-> Front : Render HTML WebView2
+    Front -- "JS IPC Proxy" --> Tauri
+    Tauri -- "Rust API rusqlite/directories" --> Files
+    Tauri -- "Render HTML WebView2" --> Front
 ```
 
 ### 3.8 Diagrama de Distribución
 ```mermaid
-deploymentDiagram
-    node "Cliente MS Windows 10/11" {
-        node "Proceso Desktop (EXE)" {
-            component TauriCore
-            component WebView2Render
-        }
-        node "Almacenamiento Persistente" {
-            artifact "AppData/Local/SOC/VulnManager/data/datos_seguridad.db"
-        }
-    }
+flowchart TD
+    subgraph Windows ["Cliente MS Windows 10/11"]
+        subgraph Proceso ["Proceso Desktop (EXE)"]
+            TauriCore[TauriCore]
+            WebView[WebView2Render]
+        end
+        subgraph Almacenamiento ["Almacenamiento Persistente"]
+            DB[("AppData/Local/.../VulnManager/.../datos_seguridad.db")]
+        end
+        TauriCore --> DB
+        WebView -.Render.-> TauriCore
+    end
 ```
 
 ---
